@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.mapper.board">
+	
+	<delete id="deleteAllAttach">
+		delete from tbl_attach
+		where bno=#{bno}
+	</delete>
+	
+	<delete id="deleteAttach">
+		delete from tbl_attach 
+		where bno=#{bno} and fullName=#{fileName}
+	</delete>
+	
+	
+	<select id="getId" resultType="Integer">
+		select max(id) from tbl_attach
+	</select>
+		
+	<insert id="addAttach">
+		insert into tbl_attach
+		(id, fullName, bno)
+		values
+		(#{id}, #{fullName}, #{bno})
+	</insert>
+	<!-- 
+	<select id="list" resultType="kr.co.domain.BoardVO">
+		select * from tbl_board 
+		where bno=#{bno}
+		order by bno desc
+	</select> 
+	-->
+	
+	<update id="incrViewCnt">
+		update tbl_board set viewcnt=viewcnt+1 where bno = #{bno}
+	</update>
+	
+	<select id="list" resultType="kr.co.domain.BoardVO">
+		select * from tbl_board 
+		order by bno desc
+	</select>
+	
+	<select id="createBno" resultType="Integer">
+		select max(bno) from tbl_board
+	</select>
+
+	<insert id="insert" >
+		insert into tbl_board 
+		(bno, title, writer, content, viewCnt) 
+		values 
+		(#{bno},#{title},#{writer},#{content},0)
+	</insert>
+	
+	<select id="read" resultType="kr.co.domain.BoardVO">
+		select * from tbl_board 
+		where bno=#{bno}
+	</select>
+	
+	<select  id="updateUI" resultType="kr.co.domain.BoardVO">
+		select * from tbl_board where 
+		bno=#{bno} 
+	</select>
+	
+	<update id ="update">
+		update tbl_board 
+		set writer=#{writer}, 
+		title=#{title}, 
+		content=#{content},  
+		updatedate=sysdate 
+		where bno=#{bno}
+	</update>
+	
+	<delete id="delete">
+		delete from tbl_board 
+		where bno=#{bno}
+	</delete>
+	
+	<select id="getAmount" resultType="Integer">
+		select count(bno) from tbl_board
+	</select>
+	
+	<update id="updateViewCnt">
+		update tbl_board 
+		set viewCnt=viewCnt+1 
+		where bno=#{bno}
+	</update>
+	
+	
+	
+	<!-- <select id="search" resultType="kr.co.domain.BoardVO">
+		select * from tbl_board 
+		where ${searchType} like '%'||#{keyword}||'%' 
+		order by bno desc
+	</select> -->
+	
+	<!-- 일반적으로 말바티스에 자료 넣을 때 #{}을 사용한다.
+	그럼 ${}는???
+	
+	#{} - 작은따옴표가 자동으로 포함된다 PreparedStratement
+	${} - 작은 따옴표가 없다. Statement, SQL Injection 해킹 취약함. -->
+	
+	<!-- Mybatis의 동적 쿼리 이용해서 작성해야한다. -->
+	
+	<sql id="searchIf">
+		<if test="searchType !=null">
+			<if test="searchType =='writer'.toString()">
+				where 
+				upper(writer) like 
+				'%'||upper(#{keyword})||'%' 			
+			</if>
+			<if test="searchType =='title'.toString()">
+				where 
+				lower(title) like 
+				'%'||lower(#{keyword})||'%' 			
+			</if>
+			<if test="searchType =='content'.toString()">
+				where 
+				lower(content) like 
+				'%'||lower(#{keyword})||'%' 			
+			</if>
+		</if>
+	</sql>
+	
+	
+	
+	<select id="search" resultType="kr.co.domain.BoardVO">
+	<![CDATA[
+		select * from tbl_board 
+		]]>
+		<include refid="searchIf"></include>
+		<![CDATA[ 
+		order by bno desc
+		
+		]]>
+	</select>
+
+<!-- <![CDATa  = 텍스트로 인식 / 쿼리 문이 길어지면 사용 -->
+	
+	
+	<select resultType="Integer" id="getSearchAmount">
+		select count(bno) from tbl_board 
+		<include refid="searchIf"></include>
+	</select>
+	
+
+	
+	
+	<!-- <insert id="insert">
+		insert into member (id, name, age) values
+		(#{id},#{name},#{age})
+	</insert>
+
+	<select id="select" resultType="kr.co.domain.MemberDTO">
+		select * from member
+	</select>
+
+	<select id="selectById" resultType="kr.co.domain.MemberDTO">
+		select * from member where
+		id=#{id}
+	</select>
+
+	<select id="updateui" resultType="kr.co.domain.MemberDTO">
+		select * from member where
+		id=#{id}
+	</select>
+
+	<update id="update">
+		update member set name=#{name}, age=#{age} where
+		id=#{id}
+	</update>
+
+	<delete id="delete">
+		delete from member where id=#{id}
+	</delete> -->
+</mapper>
